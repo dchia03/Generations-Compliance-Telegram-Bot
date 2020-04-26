@@ -4,9 +4,9 @@ from telegram import (
     ReplyKeyboardRemove
 )
 
+from main.common.constants import *
 from main.entity.document import Document
 from main.stores.helper_function_store import make_keyboard_reply_markup
-
 from main.utils.logger import Logger
 
 log = Logger(__name__)
@@ -50,80 +50,80 @@ def is_cell_leader(cell_leader):
 
 
 def is_baptised(baptised):
-    return baptised == "Yes" or baptised == "No"
+    return baptised == BAPTISED_YES or baptised == BAPTISED_NO
 
 
 def is_role(role):
-    return role == "Ministry Head" or role == "Leader" or role == "Member"
+    return role == ROLE_MINISTRY_HEAD or role == ROLE_LEADER or role == ROLE_MEMBER
 
 
 class Member(Document):
-    NON_VIEWING_FIELDS = ["Telegram ID"]
+    NON_VIEWING_FIELDS = [FIELD_TELEGRAM_ID]
     ALL_FIELDS_REPLY_MARKUP = {
-        "Telegram ID": ReplyKeyboardRemove(),
-        "Full Name": ReplyKeyboardRemove(),
-        "Name": ReplyKeyboardRemove(),
-        "DOB": ReplyKeyboardRemove(),
-        "HP": ReplyKeyboardRemove(),
-        "Cell Group": ReplyKeyboardRemove(),
-        "Cell Leader": ReplyKeyboardRemove(),
-        "Baptised": make_keyboard_reply_markup([["Yes", "No"]]),
-        "Role": make_keyboard_reply_markup([["Member"]])
+        FIELD_TELEGRAM_ID: ReplyKeyboardRemove(),
+        FIELD_FULL_NAME: ReplyKeyboardRemove(),
+        FIELD_NAME: ReplyKeyboardRemove(),
+        FIELD_DOB: ReplyKeyboardRemove(),
+        FIELD_HP: ReplyKeyboardRemove(),
+        FIELD_CELL_GROUP: ReplyKeyboardRemove(),
+        FIELD_CELL_LEADER: ReplyKeyboardRemove(),
+        FIELD_BAPTISED: make_keyboard_reply_markup([[BAPTISED_YES, BAPTISED_NO]]),
+        FIELD_ROLE: make_keyboard_reply_markup([[ROLE_MEMBER]])
     }
     ALL_FIELDS_ENTRY_EGS = {
-        "Telegram ID": None,
-        "Full Name": "John Smith Wei Xiang",
-        "Name": "John Smith",
-        "DOB": "DD/MM/YYYY",
-        "HP": "91234567",
-        "Cell Group": "GY 1.1",
-        "Cell Leader": "Matt Chen",
-        "Baptised": "Yes or No",
-        "Role": "Member"
+        FIELD_TELEGRAM_ID: None,
+        FIELD_FULL_NAME: "John Smith Wei Xiang",
+        FIELD_NAME: "John Smith",
+        FIELD_DOB: "DD/MM/YYYY",
+        FIELD_HP: "91234567",
+        FIELD_CELL_GROUP: "GY 1.1",
+        FIELD_CELL_LEADER: "Matt Chen",
+        FIELD_BAPTISED: "Yes or No",
+        FIELD_ROLE: "Member"
     }
     EDITABLE_FIELDS = [
-        "Full Name", "Name", "DOB", "HP",
-        "Cell Group", "Cell Leader", "Baptised"
+        FIELD_FULL_NAME, FIELD_NAME, FIELD_DOB, FIELD_HP,
+        FIELD_CELL_GROUP, FIELD_CELL_LEADER, FIELD_BAPTISED
     ]
 
     def __init__(self, member_details=None, telegram_id=""):
         super().__init__(
             all_fields=[
-                "Telegram ID", "Full Name", "Name", "DOB", "HP",
-                "Cell Group", "Cell Leader", "Baptised", "Role"
+                FIELD_TELEGRAM_ID, FIELD_FULL_NAME, FIELD_NAME, FIELD_DOB, FIELD_HP,
+                FIELD_CELL_GROUP, FIELD_CELL_LEADER, FIELD_BAPTISED, FIELD_ROLE
             ],
             all_fields_data_type={
-                "Telegram ID": str,
-                "Full Name": str,
-                "Name": str,
-                "DOB": str,
-                "HP": str,
-                "Cell Group": str,
-                "Cell Leader": str,
-                "Baptised": str,
-                "Role": str
+                FIELD_TELEGRAM_ID: str,
+                FIELD_FULL_NAME: str,
+                FIELD_NAME: str,
+                FIELD_DOB: str,
+                FIELD_HP: str,
+                FIELD_CELL_GROUP: str,
+                FIELD_CELL_LEADER: str,
+                FIELD_BAPTISED: str,
+                FIELD_ROLE: str
             },
             all_fields_data_format={
-                "Telegram ID": is_telegram_id,
-                "Full Name": is_full_name,
-                "Name": is_name,
-                "DOB": is_dob,
-                "HP": is_hp,
-                "Cell Group": is_cell_group,
-                "Cell Leader": is_cell_leader,
-                "Baptised": is_baptised,
-                "Role": is_role
+                FIELD_TELEGRAM_ID: is_telegram_id,
+                FIELD_FULL_NAME: is_full_name,
+                FIELD_NAME: is_name,
+                FIELD_DOB: is_dob,
+                FIELD_HP: is_hp,
+                FIELD_CELL_GROUP: is_cell_group,
+                FIELD_CELL_LEADER: is_cell_leader,
+                FIELD_BAPTISED: is_baptised,
+                FIELD_ROLE: is_role
             },
-            non_editable_fields=["Telegram ID", "Role"],
+            non_editable_fields=[FIELD_TELEGRAM_ID, FIELD_ROLE],
             document_details=member_details
         )
         if member_details is None:
-            self.get_document()["Role"] = "Member"
-            self.get_document()["Telegram ID"] = telegram_id
+            self.get_document()[FIELD_ROLE] = ROLE_MEMBER
+            self.get_document()[FIELD_TELEGRAM_ID] = telegram_id
 
     def __eq__(self, member):
         if isinstance(member, Member):
-            return self.get_datafield("Name") == member.get_datafield("Name")
+            return self.get_datafield(FIELD_NAME) == member.get_datafield(FIELD_NAME)
         return False
 
     def __str__(self):

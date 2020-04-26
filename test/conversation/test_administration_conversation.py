@@ -11,7 +11,7 @@ class TestAdministrationConversation(unittest.TestCase):
     def setUp(self):
         self.log = Logger(__name__)
 
-    def test_admin_start(self):
+    def test_admin_start(self, find):
         bot = MagicMock()
         update = MagicMock(**{
             "message.from_user.first_name": "test_user",
