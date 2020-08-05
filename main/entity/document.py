@@ -6,16 +6,20 @@ from main.utils.logger import Logger
 class Document(object):
     DOC_ID_FIELD = "_id"
     DOC_ID_FIELD_DATA_TYPE = bson.objectid.ObjectId
+    DEFAULT_NON_EDITABLE_FIELDS = [DOC_ID_FIELD]
     log = Logger(__name__)
 
     def __init__(
             self, all_fields, all_fields_data_type, all_fields_data_format,
-            non_editable_fields, document_details=None
+            non_editable_fields=None, document_details=None
     ):
         self.all_fields = all_fields
         self.all_fields_data_type = all_fields_data_type
         self.all_fields_data_format = all_fields_data_format
-        self.non_editable_fields = non_editable_fields
+        if non_editable_fields is None or []:
+            self.non_editable_fields = self.DEFAULT_NON_EDITABLE_FIELDS
+        else:
+            self.non_editable_fields = non_editable_fields
         if document_details is None:
             self.document_obj = {field: None for field in self.all_fields}
         else:

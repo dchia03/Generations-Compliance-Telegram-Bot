@@ -1,4 +1,4 @@
-# Common
+# Field Constants
 FIELD_MONTH = "Month"
 FIELD_YEAR = "Year"
 

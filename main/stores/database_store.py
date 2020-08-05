@@ -4,25 +4,27 @@
 ########
 # Keys #
 ########
-import sys
 
+from main.constants.database import *
 from main.entity.collection import Collection
 from main.entity.database import Database
 from main.entity.ordered_collection import OrderedCollection
-from properties import props
+from main.utils.properties import Properties
+
+props = Properties()
 
 ##################
 # Admin Database #
 ##################
 
 db = Database(
-    mongo_client_str=props.mongo_client_str,
-    database_name="GenerationsCompliance"
+    mongo_client_str=props.mongo_db_client,
+    database_name=MAIN_DATABASE_NAME
 )
 
 admin_db = Collection(
     database=db,
-    collection_name="AdministrationList"
+    collection_name=ADMINISTRATION_COLLECTION
 )
 
 ###################
@@ -31,7 +33,7 @@ admin_db = Collection(
 
 roster_db = OrderedCollection(
     database=db,
-    collection_name="Roster"
+    collection_name=ROSTER_COLLECTION
 )
 
 ##########################
@@ -40,7 +42,7 @@ roster_db = OrderedCollection(
 
 block_out_dates_db = OrderedCollection(
     database=db,
-    collection_name="BlockOutDates"
+    collection_name=BLOCK_OUT_DATES_COLLECTION
 )
 
 ##########################
@@ -49,5 +51,5 @@ block_out_dates_db = OrderedCollection(
 
 duty_management_db = Collection(
     database=db,
-    collection_name="DutyManagement"
+    collection_name=DUTY_MANAGEMENT_COLLECTION
 )

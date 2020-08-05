@@ -11,7 +11,7 @@ from telegram.ext import (
 ###############
 ## Constants ##
 ###############
-from main.common.constants import *
+from main.constants.field import *
 ##############
 ## Document ##
 ##############

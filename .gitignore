@@ -1,7 +1,6 @@
 # Additional stuff
 .idea/
-properties.py
-/properties
+props.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

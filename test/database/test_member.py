@@ -1,6 +1,7 @@
 import unittest
-from main.utils.logger import Logger
+
 from main.database.member import Member, is_telegram_id, is_role
+from main.utils.logger import Logger
 
 
 class TestMember(unittest.TestCase):
@@ -53,3 +54,9 @@ class TestMember(unittest.TestCase):
         assert is_role("Ministry Head")
         assert is_role("Leader")
         assert not is_role("Not Role")
+
+    def test_member_empty_field(self):
+        m = Member(telegram_id="1234")
+        for field in Member.EDITABLE_FIELDS:
+            assert(m.get_datafield(field=field) is None)
+        self.log.info(m.get_member_str())

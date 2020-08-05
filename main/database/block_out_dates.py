@@ -1,6 +1,6 @@
 import datetime as dt
 
-from main.common.constants import *
+from main.constants.field import *
 from main.entity.document import Document
 
 

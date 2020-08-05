@@ -17,7 +17,7 @@ class Collection(object):
         self.database = database.get_database()
         self.database_name = database.get_database_name()
         self.collection_name = collection_name
-        self.c = self.database[collection_name]
+        self.c = self.database.get_collection(collection_name)
 
     def get_collection(self):
         return self.c
@@ -71,3 +71,10 @@ class Collection(object):
                 document.DOC_ID_FIELD: document.get_datafield(document.DOC_ID_FIELD)
             }
         )
+
+    def contains_document(self, filter):
+        return self.get_document(filter=filter) is not None
+
+    def has_field_value_in_document(self, filter, field, value):
+        document = self.get_document(filter=filter)
+        return document is not None and document[field] == value

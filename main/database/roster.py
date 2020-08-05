@@ -1,6 +1,6 @@
 import datetime as dt
 
-from main.common.constants import *
+from main.constants.field import *
 from main.entity.document import Document
 from main.utils.logger import Logger
 
@@ -12,7 +12,7 @@ def is_month(month):
         dt.datetime.strptime(month, '%B').month
         return True
     except Exception as e:
-        logger.warn(str(e))
+        logger.error(str(e))
         return False
 
 

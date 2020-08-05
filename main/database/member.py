@@ -4,7 +4,7 @@ from telegram import (
     ReplyKeyboardRemove
 )
 
-from main.common.constants import *
+from main.constants.field import *
 from main.entity.document import Document
 from main.stores.helper_function_store import make_keyboard_reply_markup
 from main.utils.logger import Logger

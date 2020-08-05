@@ -1,4 +1,3 @@
-from properties import props
 from telegram import ReplyKeyboardRemove
 from telegram.ext import CommandHandler
 from telegram.ext import Updater
@@ -8,6 +7,7 @@ from main.conversation.feedback_conversation import feedback_conv_handler
 from main.conversation.serve_conversation import serve_conv_handler
 from main.stores.database_store import admin_db
 from main.utils.logger import Logger
+from main.utils.properties import Properties
 
 log = Logger(__name__)
 
@@ -76,7 +76,8 @@ def cancel(bot, update):
     )
 
 
-log.info("Profile: " + props.profile)
+props = Properties()
+log.info("Application Environment: " + props.environment)
 generations_compliance_bot_token = props.chatbot_token
 updater = Updater(token=generations_compliance_bot_token)
 # send_update_message_to_all(updater = updater)

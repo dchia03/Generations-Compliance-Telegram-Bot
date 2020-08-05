@@ -1,8 +1,8 @@
 ###################
 ## Reply Options ##
 ###################
-from main.utils.reply_option import ReplyOption
 from main.stores.helper_function_store import make_reply_text
+from main.utils.reply_option import ReplyOption
 
 ##########
 # Common #
@@ -11,7 +11,7 @@ BACK = ReplyOption("Back", "Go to previous menu")
 QUIT = ReplyOption("Quit", "Exit Menu")
 CANCEL = ReplyOption("Cancel", "End Session")
 
-UNKNOWN_REPLY_MSG = ReplyOption("", "Invalid Reply\nReturning to previous menu")
+UNKNOWN_REPLY_MSG = ReplyOption("", "Invalid Reply. Returning to previous menu.")
 
 #####################
 # AdminConversation #
@@ -77,15 +77,19 @@ BLOCK_OUT_DATES_SUBMIT = ReplyOption("Block Out Dates Submit")
 BLOCK_DATES = ReplyOption("Block Dates", "Block serving dates for next roster")
 ENTER_BLOCK_OUT_DATES_MSG = make_reply_text([
     "How to Enter Block Out Dates:\n",
-    "If you can't serve on the 9th and the 16th, please enter as such: 9 16" ,
+    "If you can't serve on the 9th and the 16th, please enter as such: 9 16",
     "Please leave a space after each date.",
     "Enter 0 if you are not blocking any date.\n",
     "Enter Block Out Dates: "
 ])
 
-UNAUTHORISED_USE_MSG = "Unauthorised User\n" + "Going Back to previous menu"
-ERROR_MSG = 'Error has occurred\n' + 'Exiting Session'
-UNAUTHORISED_ACCESS_MSG = "Unauthorised Access\n\n" + "For access, please contact System Admin via /feedback\n" + "Thank You"
+UNAUTHORISED_USE_MSG = "Unauthorised User.\nGoing Back to previous menu."
+ERROR_MSG = 'Error has occurred.\nExiting Session.'
+UNAUTHORISED_ACCESS_MSG = make_reply_text([
+    "UNAUTHORISED ACCESS\n",
+    "For access, please contact System Admin via /feedback.",
+    "Thank You."
+])
 
 ########################
 # FeedbackConversation #

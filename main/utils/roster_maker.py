@@ -1,6 +1,6 @@
 import random
 
-from main.common.constants import *
+from main.constants.field import *
 from main.database.roster import Roster
 
 
