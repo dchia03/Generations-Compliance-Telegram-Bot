@@ -7,7 +7,7 @@ from main.conversation.feedback_conversation import feedback_conv_handler
 from main.conversation.serve_conversation import serve_conv_handler
 from main.stores.database_store import admin_db
 from main.utils.logger import Logger
-from properties import props
+from main.utils.properties import Properties
 
 log = Logger(__name__)
 
@@ -59,7 +59,7 @@ def send_update_message_test_to_admin(updater):
 #######################################
 def error(bot, update, err):
     """Log Errors caused by Updates."""
-    log.warning('Update "%s" caused error "%s"', update, err)
+    log.warn('Update {} caused error {}'.format(update, err))
     update.message.reply_text(
         'Connection Timed Out\n' +
         'Resetting Connection\n' +
@@ -69,15 +69,15 @@ def error(bot, update, err):
 
 def cancel(bot, update):
     user = update.message.from_user
-    log.info("User %s canceled the conversation.", user.first_name)
+    log.info("User {} canceled the conversation.".format(user.first_name))
     update.message.reply_text(
         "Session Ended",
         reply_markup=ReplyKeyboardRemove()
     )
 
 
-
-log.info("Profile: " + props.profile)
+props = Properties()
+log.info("Application Environment: " + props.environment)
 generations_compliance_bot_token = props.chatbot_token
 updater = Updater(token=generations_compliance_bot_token)
 # send_update_message_to_all(updater = updater)

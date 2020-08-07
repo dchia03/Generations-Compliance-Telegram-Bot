@@ -8,6 +8,10 @@ from telegram.ext import (
     CommandHandler, MessageHandler, Filters, ConversationHandler
 )
 
+###############
+## Constants ##
+###############
+from main.constants.field import *
 ##############
 ## Document ##
 ##############
@@ -56,7 +60,7 @@ def basic_log(function_name, user_name, msg):
 def admin_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("admin_start", user.first_name, msg)
-    member_details_doc = admin_db.get_document(filter={"Telegram ID": str(user.id)})
+    member_details_doc = admin_db.get_document(filter={FIELD_TELEGRAM_ID: str(user.id)})
     member_details = Member(member_details=member_details_doc)
     if member_details_doc is None:
         reply_options_list = [[ENTER_MEMBER_DATA], [QUIT]]
@@ -98,7 +102,7 @@ def update_member_data_start(bot, update, user_data):
     if "member_details_str" not in user_data.keys():
         user_data["member_details"] = Member(
             member_details=admin_db.get_document(
-                filter={"Telegram ID": str(user.id)}
+                filter={FIELD_TELEGRAM_ID: str(user.id)}
             )
         )
         user_data["member_details_str"] = user_data["member_details"].get_member_str()
@@ -279,16 +283,28 @@ def delete_start(bot, update, user_data):
 def delete_data_from_database(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("delete_data_from_database", user.first_name, msg)
-    update.message.reply_text(
-        "Removing Data",
-        reply_markup=ReplyKeyboardRemove()
-    )
-    admin_db.delete_document(Member(admin_db.get_document(filter={"Telegram ID": str(user.id)})))
-    typing_action(bot, update)
-    update.message.reply_text(
-        "Data Removed\n" + "Returning to Main Menu",
-        reply_markup=ReplyKeyboardRemove()
-    )
+    if msg.lower() not in ["yes", "no"]:
+        update.message.reply_text(
+            "Invalid Reply",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return delete_start(bot, update, user_data)
+    elif msg.lower() == "yes":
+        update.message.reply_text(
+            "Removing Data",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        admin_db.delete_document(Member(admin_db.get_document(filter={FIELD_TELEGRAM_ID: str(user.id)})))
+        typing_action(bot, update)
+        update.message.reply_text(
+            "Data Removed\n" + "Returning to Main Menu",
+            reply_markup=ReplyKeyboardRemove()
+        )
+    else:
+        update.message.reply_text(
+            "Remove Cancelled\n" + "Returning to Main Menu",
+            reply_markup=ReplyKeyboardRemove()
+        )
     return admin_start(bot, update, user_data)
 
 

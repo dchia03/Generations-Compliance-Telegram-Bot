@@ -9,7 +9,6 @@ from telegram import (
     KeyboardButton, ReplyKeyboardMarkup
 )
 
-from main.stores.database_store import admin_db
 from main.utils.reply_option import ReplyOption
 
 
@@ -89,7 +88,7 @@ def make_options_text_and_reply_markup(reply_options_list):
     )
     options_text = make_options_text(
         [option.get_description() for row in reply_options_list for option in row if
-         isinstance(option, ReplyOption) and option.get_description() != None]
+         isinstance(option, ReplyOption) and option.get_description() is not None]
     )
     return options_text, reply_markup
 
@@ -97,24 +96,6 @@ def make_options_text_and_reply_markup(reply_options_list):
 ######################
 # Serve Conversation #
 ######################
-
-
-def is_in_ministry(telegram_id):
-    res = admin_db.get_document(
-        filter={
-            "Telegram ID": str(telegram_id)
-        }
-    )
-    return res is not None
-
-
-def is_ministry_head(telegram_id):
-    return admin_db.get_document(
-        filter={
-            "Telegram ID": str(telegram_id)
-        }
-    )["Role"] == "Ministry Head"
-
 
 def get_all_weekdays_in_month(wday, month, year):
     date_list = []

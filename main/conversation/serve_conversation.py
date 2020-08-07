@@ -13,34 +13,28 @@ from telegram.ext import (
 ###############
 ## Documents ##
 ###############
+from main.constants.field import FIELD_ROLE, ROLE_MINISTRY_HEAD
 from main.database.block_out_dates import BlockOutDates
 from main.database.member import Member
 from main.database.roster import Roster
-
 ###############
 ## Databases ##
 ###############
 from main.stores.database_store import (
     admin_db, roster_db, block_out_dates_db
 )
-
 ######################
 ## Helper Functions ##
 ######################
 from main.stores.helper_function_store import (
     init,
     typing_action,
-    make_keyboard_reply_markup,
-    refactor_keyboard_layout,
     make_reply_text,
     make_options_text_and_reply_markup,
-    is_in_ministry,
-    is_ministry_head,
     get_all_weekdays_in_month,
     is_valid_bod_input_dates,
     processed_member_input_block_out_dates
 )
-
 #############
 ## Strings ##
 #############
@@ -49,13 +43,7 @@ from main.stores.reply_option_store import (
     ROSTER, ROSTER_REPLY,
     REMIND,
     CREATE, CREATE_REPLY, CHECK_ROSTER_REPLY, RECREATE_ROSTER, UPLOAD_ROSTER,
-    SWAP, SWAP_REPLY, VIEW_MY_SWAP_OFFERS, VIEW_MY_SWAP_REQUESTS,
-    CREATE_SWAP_REQUEST, CREATE_SWAP_REQUEST_REPLY, CREATE_SWAP_REQUEST_CONFIRMATION,
-    EDIT_SWAP_REQUEST, DELETE_SWAP_REQUEST, VIEW_MY_SWAP_REQUESTS_REPLY,
-    REPLACE, REPLACE_REPLY,
-    CREATE_REPLACE_REQUEST, CREATE_REPLACE_REQUEST_REPLY, CREATE_REPLACE_REQUEST_CONFIRMATION,
-    ACCEPT_REPLACE_REQUEST, ACCEPT_REPLACE_REQUEST_REPLY, ACCEPT_REPLACE_REQUEST_CONFIRMATION,
-    BLOCK_OUT_DATES, BLOCK_OUT_DATES_REPLY, BLOCK_OUT_DATES_SUBMIT, BLOCK_DATES,
+    SWAP, REPLACE, BLOCK_OUT_DATES, BLOCK_OUT_DATES_REPLY, BLOCK_OUT_DATES_SUBMIT, BLOCK_DATES,
     ENTER_BLOCK_OUT_DATES_MSG,
     UNAUTHORISED_USE_MSG,
     ERROR_MSG,
@@ -63,9 +51,8 @@ from main.stores.reply_option_store import (
     BACK, QUIT, CANCEL,
     UNKNOWN_REPLY_MSG
 )
-
-from main.utils.roster_maker import roster_maker
 from main.utils.logger import Logger
+from main.utils.roster_maker import roster_maker
 
 logger = Logger(__name__)
 
@@ -89,7 +76,9 @@ def get_all_members():
 def serve_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("serve_start", user.first_name, msg)
-    if not is_in_ministry(str(user.id)):
+    if not admin_db.contains_document(filter={
+            "Telegram ID": str(user.id)
+        }):
         update.message.reply_text(
             text=UNAUTHORISED_ACCESS_MSG,
             reply_markup=ReplyKeyboardRemove()
@@ -151,7 +140,12 @@ def roster_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("roster_start", user.first_name, msg)
     reply_options_list = [[BACK, QUIT]]
-    if is_ministry_head(str(user.id)):
+    if admin_db.has_field_value_in_document(
+            filter={
+                "Telegram ID": str(user.id)
+            },
+            field=FIELD_ROLE, value=ROLE_MINISTRY_HEAD
+    ):
         reply_options_list = [[CREATE], [BACK, QUIT]]
     latest_roster = Roster(roster_details=roster_db.get_latest_document())
     member_details = Member(
@@ -182,7 +176,12 @@ def roster_reply(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("roster_reply", user.first_name, msg)
     if CREATE.reply_check(msg):
-        if not is_ministry_head(str(user.id)):
+        if not admin_db.has_field_value_in_document(
+            filter={
+                "Telegram ID": str(user.id)
+            },
+            field=FIELD_ROLE, value=ROLE_MINISTRY_HEAD
+        ):
             update.message.reply_text(UNAUTHORISED_USE_MSG, reply_markup=ReplyKeyboardRemove())
             return roster_start(bot, update, user_data)
         return create_start(bot, update, user_data)
@@ -216,7 +215,12 @@ def create_reply(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("create_reply", user.first_name, msg)
     if CREATE.reply_check(msg):
-        if not is_ministry_head(str(user.id)):
+        if not admin_db.has_field_value_in_document(
+            filter={
+                "Telegram ID": str(user.id)
+            },
+            field=FIELD_ROLE, value=ROLE_MINISTRY_HEAD
+        ):
             update.message.reply_text(UNAUTHORISED_USE_MSG, reply_markup=ReplyKeyboardRemove())
             return roster_start(bot, update, user_data)
         return create_roster(bot, update, user_data)
