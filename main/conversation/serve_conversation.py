@@ -10,19 +10,17 @@ from telegram.ext import (
     CommandHandler, MessageHandler, Filters, ConversationHandler
 )
 
-###############
-## Documents ##
-###############
-from main.constants.field import FIELD_ROLE, ROLE_MINISTRY_HEAD
-from main.database.block_out_dates import BlockOutDates
-from main.database.member import Member
-from main.database.roster import Roster
+from main.entity.collection.impl.admin_collection import admin_collection
+from main.entity.collection.impl.block_out_dates_collection import block_out_dates_collection
 ###############
 ## Databases ##
 ###############
-from main.stores.database_store import (
-    admin_db, roster_db, block_out_dates_db
-)
+from main.entity.collection.impl.roster_collection import roster_collection
+###############
+## Documents ##
+###############
+from main.entity.document.impl.block_out_dates import BlockOutDates
+from main.entity.document.impl.member import Member
 ######################
 ## Helper Functions ##
 ######################
@@ -61,44 +59,25 @@ def basic_log(function_name, user_name, msg):
     logger.info("{}-> User {} replied: {}.".format(function_name, user_name, msg))
 
 
-def get_all_members():
-    all_members = []
-    all_member_details = admin_db.get_collection()
-    for member_details in all_member_details:
-        m = Member(member_details=member_details)
-        all_members.append(m)
-    return all_members
-
-
 ##########
 # Serve ##
 ##########
 def serve_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("serve_start", user.first_name, msg)
-    if not admin_db.contains_document(filter={
-            "Telegram ID": str(user.id)
-        }):
+    if not admin_collection.has_member(str(user.id)):
         update.message.reply_text(
             text=UNAUTHORISED_ACCESS_MSG,
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
     else:
-        latest_roster = Roster(roster_details=roster_db.get_latest_document())
-        member_details = Member(
-            member_details=admin_db.get_document(
-                filter={"Telegram ID": str(user.id)}
-            )
-        )
-        member_roster_str = latest_roster.get_member_roster_dates_str(
-            member_name=member_details.get_datafield(
-                field="Name"
-            )
-        )
-        latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
+        latest_roster = roster_collection.get_latest_roster()
+        member_details = admin_collection.get_member(str(user.id))
+        member_roster_str = latest_roster.get_member_roster_dates_str(member_name=member_details.get_name())
+        latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
         member_block_out_dates_str = latest_block_out_dates.get_member_block_out_dates_str(
-            member_name=member_details.get_datafield(field="Name")
+            member_name=member_details.get_name()
         )
         reply_options_list = [[ROSTER, BLOCK_OUT_DATES], [SWAP, REPLACE], [QUIT]]
         options_text, reply_markup = make_options_text_and_reply_markup(reply_options_list)
@@ -140,23 +119,12 @@ def roster_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("roster_start", user.first_name, msg)
     reply_options_list = [[BACK, QUIT]]
-    if admin_db.has_field_value_in_document(
-            filter={
-                "Telegram ID": str(user.id)
-            },
-            field=FIELD_ROLE, value=ROLE_MINISTRY_HEAD
-    ):
+    if admin_collection.is_ministry_head_role(str(user.id)):
         reply_options_list = [[CREATE], [BACK, QUIT]]
-    latest_roster = Roster(roster_details=roster_db.get_latest_document())
-    member_details = Member(
-        member_details=admin_db.get_document(
-            filter={"Telegram ID": str(user.id)}
-        )
-    )
+    latest_roster = roster_collection.get_latest_roster()
+    member_details = admin_collection.get_member(str(user.id))
     member_roster_str = latest_roster.get_member_roster_dates_str(
-        member_name=member_details.get_datafield(
-            field="Name"
-        )
+        member_name=member_details.get_name()
     )
     options_text, reply_markup = make_options_text_and_reply_markup(reply_options_list)
     update.message.reply_text(
@@ -176,12 +144,7 @@ def roster_reply(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("roster_reply", user.first_name, msg)
     if CREATE.reply_check(msg):
-        if not admin_db.has_field_value_in_document(
-            filter={
-                "Telegram ID": str(user.id)
-            },
-            field=FIELD_ROLE, value=ROLE_MINISTRY_HEAD
-        ):
+        if not admin_collection.is_ministry_head_role(str(user.id)):
             update.message.reply_text(UNAUTHORISED_USE_MSG, reply_markup=ReplyKeyboardRemove())
             return roster_start(bot, update, user_data)
         return create_start(bot, update, user_data)
@@ -200,7 +163,7 @@ def roster_reply(bot, update, user_data):
 def create_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("create_start", user.first_name, msg)
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
     options_text, reply_markup = make_options_text_and_reply_markup(
         reply_options_list=[[CREATE, REMIND], [BACK, QUIT]]
     )
@@ -215,12 +178,7 @@ def create_reply(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("create_reply", user.first_name, msg)
     if CREATE.reply_check(msg):
-        if not admin_db.has_field_value_in_document(
-            filter={
-                "Telegram ID": str(user.id)
-            },
-            field=FIELD_ROLE, value=ROLE_MINISTRY_HEAD
-        ):
+        if not admin_collection.is_ministry_head_role(str(user.id)):
             update.message.reply_text(UNAUTHORISED_USE_MSG, reply_markup=ReplyKeyboardRemove())
             return roster_start(bot, update, user_data)
         return create_roster(bot, update, user_data)
@@ -238,18 +196,18 @@ def create_reply(bot, update, user_data):
 def create_roster(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("create_roster", user.first_name, msg)
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
-    latest_roster = Roster(roster_details=roster_db.get_latest_document())
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
+    latest_roster = roster_collection.get_latest_roster()
     update.message.reply_text(
         text='Creating Roster for {} {}'.format(
-            latest_block_out_dates.get_datafield(field="Month"),
-            latest_block_out_dates.get_datafield(field="Year")
+            latest_block_out_dates.get_month(),
+            latest_block_out_dates.get_year()
         ),
         reply_markup=ReplyKeyboardRemove()
     )
     user_data["new_roster"] = roster_maker(
         block_out_dates=latest_block_out_dates,
-        all_members=get_all_members(),
+        all_members=admin_collection.get_all_members(),
         prev_roster=latest_roster
     )
     return check_roster(bot, update, user_data)
@@ -293,27 +251,27 @@ def check_roster_reply(bot, update, user_data):
 def upload_roster(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("upload_roster", user.first_name, msg)
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
-    latest_roster = Roster(roster_details=roster_db.get_latest_document())
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
+    latest_roster = roster_collection.get_latest_roster()
     update.message.reply_text(
         text='Uploading Roster to Database',
         reply_markup=ReplyKeyboardRemove()
     )
     typing_action(bot, update)
 
-    latest_block_out_dates_month = str(latest_block_out_dates.get_datafield("Month"))
-    latest_block_out_dates_year = int(latest_block_out_dates.get_datafield("Year"))
+    latest_block_out_dates_month = str(latest_block_out_dates.get_month())
+    latest_block_out_dates_year = int(latest_block_out_dates.get_year())
     latest_block_out_dates_month_int = dt.datetime.strptime(latest_block_out_dates_month, '%B').month
 
-    latest_roster_year = int(latest_roster.get_datafield("Year"))
-    latest_roster_month_int = int(dt.datetime.strptime(latest_roster.get_datafield("Month"), '%B').month)
+    latest_roster_year = int(latest_roster.get_year())
+    latest_roster_month_int = int(dt.datetime.strptime(latest_roster.get_month(), '%B').month)
 
     if not (
             latest_roster_month_int + 1 == latest_block_out_dates_month_int
             and latest_roster_year
             and latest_block_out_dates_year
-        )\
-        and not(
+    ) \
+            and not (
             latest_roster_month_int + 1 == 13
             and latest_block_out_dates_month_int == 1
             and latest_roster_year + 1 == latest_block_out_dates_year
@@ -332,11 +290,11 @@ def upload_roster(bot, update, user_data):
         month=dt.datetime(year=new_year, month=new_month_int, day=1).strftime('%B'),
         year=int(new_year),
         block_out_dates={str(d): [] for d in get_all_weekdays_in_month(wday=5, month=new_month_int, year=new_year)},
-        unconfirmed=[m.get_datafield("Name") for m in get_all_members()]
+        unconfirmed=[m.get_name() for m in admin_collection.get_all_members()]
     )
 
-    roster_db.add_document(document=user_data["new_roster"])
-    block_out_dates_db.add_document(document=new_block_out_dates)
+    roster_collection.add_roster(roster=user_data["new_roster"])
+    block_out_dates_collection.add_block_out_dates(bod=new_block_out_dates)
 
     update.message.reply_text(
         'Upload Complete\n' +
@@ -350,16 +308,16 @@ def remind_members(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("remind_members", user.first_name, msg)
     update.message.reply_text("Sending Reminders to Members")
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
-    for name in latest_block_out_dates.get_datafield("Unconfirmed"):
-        member_data = Member(member_details=admin_db.get_document(filter={"Name": str(name)}))
-        if not member_data == None:
-            telegram_id = member_data.get_datafield("Telegram ID")
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
+    for name in latest_block_out_dates.get_unconfirmed():
+        member_data = Member(member_details=admin_collection.get_document(filter={"Name": str(name)}))
+        if member_data is not None:
+            telegram_id = member_data.get_telegram_id()
             logger.info('Sending reminder to {}'.format(name))
             bot.send_message(
                 chat_id=int(telegram_id),
                 text="Hi {}\nPlease remember to update your serving availability for {} {}\n".format(
-                    name, latest_block_out_dates.get_datafield("Month"), latest_block_out_dates.get_datafield("Year")
+                    name, latest_block_out_dates.get_month(), latest_block_out_dates.get_year()
                 ) + "Thank You and have a blessed day!"
             )
         else:
@@ -413,10 +371,10 @@ def swap_dev(bot, update, user_data):
 def bod_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("bod_start", user.first_name, msg)
-    member_data = Member(member_details=admin_db.get_document(filter={"Telegram ID": str(user.id)}))
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
+    member_data = admin_collection.get_member(str(user.id))
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
     member_block_out_dates_str = latest_block_out_dates.get_member_block_out_dates_str(
-        member_name=member_data.get_datafield("Name")
+        member_name=member_data.get_name()
     )
     options_text, reply_markup = make_options_text_and_reply_markup(
         reply_options_list=[[BLOCK_DATES], [BACK, QUIT]]
@@ -445,10 +403,10 @@ def bod_reply(bot, update, user_data):
 def bod_enter(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("block_dates", user.first_name, msg)
-    member_data = Member(member_details=admin_db.get_document(filter={"Telegram ID": str(user.id)}))
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
+    member_data = admin_collection.get_member(str(user.id))
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
     member_block_out_dates_str = latest_block_out_dates.get_member_block_out_dates_str(
-        member_name=member_data.get_datafield("Name")
+        member_name=member_data.get_name()
     )
     update.message.reply_text(
         text=make_reply_text([
@@ -464,8 +422,8 @@ def bod_enter(bot, update, user_data):
 def bod_submit(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("block_dates", user.first_name, msg)
-    member_data = Member(member_details=admin_db.get_document(filter={"Telegram ID": str(user.id)}))
-    latest_block_out_dates = BlockOutDates(block_out_dates_details=block_out_dates_db.get_latest_document())
+    member_data = admin_collection.get_member(str(user.id))
+    latest_block_out_dates = block_out_dates_collection.get_latest_block_out_dates()
     if is_valid_bod_input_dates(msg, latest_block_out_dates):
         update.message.reply_text(
             text="Updating Member Block Out Dates",
@@ -473,14 +431,14 @@ def bod_submit(bot, update, user_data):
         )
         typing_action(bot, update)
         latest_block_out_dates.update_member_block_out_dates(
-            member_name=member_data.get_datafield("Name"),
+            member_name=member_data.get_name(),
             member_block_out_dates=processed_member_input_block_out_dates(
                 msg=msg,
                 block_out_dates=latest_block_out_dates
             )
         )
-        latest_block_out_dates.update_unconfirmed(member_name=member_data.get_datafield("Name"))
-        block_out_dates_db.update_document(updated_document=latest_block_out_dates)
+        latest_block_out_dates.update_unconfirmed(member_name=member_data.get_name())
+        block_out_dates_collection.update_document(updated_document=latest_block_out_dates)
         update.message.reply_text(
             text="Update Completed\n" + "Returning to Main Menu",
             reply_markup=ReplyKeyboardRemove()

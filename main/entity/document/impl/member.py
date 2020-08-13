@@ -1,60 +1,12 @@
-import datetime as dt
+from telegram import ReplyKeyboardRemove
 
-from telegram import (
-    ReplyKeyboardRemove
-)
-
-from main.constants.field import *
-from main.entity.document import Document
+from main.constants.field_names import *
+from main.entity.document.base.document_base import Document
+from main.entity.document.common.common_document_function_store import *
 from main.stores.helper_function_store import make_keyboard_reply_markup
 from main.utils.logger import Logger
 
 log = Logger(__name__)
-
-
-def is_telegram_id(telegram_id):
-    return type(telegram_id) == int
-
-
-def is_name(name):
-    for name_part in name.split(" "):
-        if not name_part.strip().isalpha():
-            return False
-    return True
-
-
-def is_full_name(full_name):
-    return is_name(full_name)
-
-
-def is_dob(dob):
-    try:
-        dt_format = "%d/%m/%Y"
-        dt.datetime.strptime(dob, dt_format)
-        return True
-    except ValueError as e:
-        log.error(e)
-        return False
-
-
-def is_hp(hp):
-    return len(hp) == 8 and hp.isdigit()
-
-
-def is_cell_group(cell_group):
-    return type(cell_group) == str
-
-
-def is_cell_leader(cell_leader):
-    return is_name(cell_leader)
-
-
-def is_baptised(baptised):
-    return baptised == BAPTISED_YES or baptised == BAPTISED_NO
-
-
-def is_role(role):
-    return role == ROLE_MINISTRY_HEAD or role == ROLE_LEADER or role == ROLE_MEMBER
 
 
 class Member(Document):
@@ -132,6 +84,9 @@ class Member(Document):
     def __repr__(self):
         return str(self.get_document())
 
+    def is_empty(self):
+        return self.get_telegram_id() is None or self.get_telegram_id() == ""
+
     def get_member_str(self):
         msg = "Member Details\n\n"
         is_empty_details = True
@@ -145,3 +100,30 @@ class Member(Document):
             msg += "*** No Records ***"
         msg += "\n"
         return msg
+
+    def get_telegram_id(self):
+        return self.get_datafield(FIELD_TELEGRAM_ID)
+
+    def get_full_name(self):
+        return self.get_datafield(FIELD_FULL_NAME)
+
+    def get_name(self):
+        return self.get_datafield(FIELD_NAME)
+
+    def get_dob(self):
+        return self.get_datafield(FIELD_DOB)
+
+    def get_hp(self):
+        return self.get_datafield(FIELD_HP)
+
+    def get_cell_group(self):
+        return self.get_datafield(FIELD_CELL_GROUP)
+
+    def get_cell_leader(self):
+        return self.get_datafield(FIELD_CELL_LEADER)
+
+    def get_baptised(self):
+        return self.get_datafield(FIELD_BAPTISED)
+
+    def get_role(self):
+        return self.get_datafield(FIELD_ROLE)

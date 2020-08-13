@@ -5,9 +5,9 @@ from telegram.ext import Updater
 from main.conversation.administration_conversation import admin_conv_handler
 from main.conversation.feedback_conversation import feedback_conv_handler
 from main.conversation.serve_conversation import serve_conv_handler
-from main.stores.database_store import admin_db
+from main.entity.collection.impl.admin_collection import admin_collection
+from main.props.properties import PROPS
 from main.utils.logger import Logger
-from main.utils.properties import Properties
 
 log = Logger(__name__)
 
@@ -16,15 +16,11 @@ log = Logger(__name__)
 ## Helper Functions ##
 ######################
 def get_all_members_ids():
-    all_ids = []
-    all_admin_data = admin_db.collection.find({})
-    for data in all_admin_data:
-        all_ids.append(int(data["Telegram ID"]))
-    return all_ids
+    return [m.get_telegram_id() for m in admin_collection.get_all_members()]
 
 
 def get_ministry_head_id():
-    all_admin_data = admin_db.collection.find({})
+    all_admin_data = admin_collection.collection.find({})
     for data in all_admin_data:
         if data["Role"] == "Ministry Head":
             return int(data["Telegram ID"])
@@ -76,9 +72,8 @@ def cancel(bot, update):
     )
 
 
-props = Properties()
-log.info("Application Environment: " + props.environment)
-generations_compliance_bot_token = props.chatbot_token
+log.info("Application Environment: " + PROPS.environment)
+generations_compliance_bot_token = PROPS.chatbot_token
 updater = Updater(token=generations_compliance_bot_token)
 # send_update_message_to_all(updater = updater)
 dp = updater.dispatcher

@@ -7,12 +7,12 @@ class Document(object):
     DOC_ID_FIELD = "_id"
     DOC_ID_FIELD_DATA_TYPE = bson.objectid.ObjectId
     DEFAULT_NON_EDITABLE_FIELDS = [DOC_ID_FIELD]
-    log = Logger(__name__)
 
     def __init__(
             self, all_fields, all_fields_data_type, all_fields_data_format,
             non_editable_fields=None, document_details=None
     ):
+        self.log = Logger(__name__)
         self.all_fields = all_fields
         self.all_fields_data_type = all_fields_data_type
         self.all_fields_data_format = all_fields_data_format

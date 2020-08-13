@@ -14,11 +14,10 @@ from telegram.ext import (
 ############
 # Document #
 ############
-from main.database.member import Member
 ###############
 ## Databases ##
 ###############
-from main.stores.database_store import admin_db
+from main.entity.collection.impl.admin_collection import admin_collection
 from main.stores.helper_function_store import (
     init,
     make_reply_text,
@@ -103,13 +102,13 @@ def feedback_check_reply(bot, update, user_data):
 def feedback_send(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("feedback_check_reply", user.first_name, msg)
-    administrator_details = Member(member_details=admin_db.get_document(filter={"Role": "Ministry Head"}))
-    sender_details = Member(member_details=admin_db.get_document(filter={"Telegram ID": str(user.id)}))
+    administrator_details = admin_collection.get_ministry_head()
+    sender_details = admin_collection.get_member(str(user.id))
     bot.send_message(
-        chat_id=int(administrator_details.get_datafield("Telegram ID")),
+        chat_id=int(administrator_details.get_telegram_id()),
         text=make_reply_text(
             [
-                "From: {}".format(sender_details.get_datafield("Name")),
+                "From: {}".format(sender_details.get_name()),
                 "Created Date: {}".format(dt.datetime.now(timezone(TIMEZONE)).strftime(DATETIME_FORMAT)),
                 "Query:",
                 user_data["msg"]

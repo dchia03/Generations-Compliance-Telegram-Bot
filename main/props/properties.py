@@ -54,3 +54,7 @@ class Properties(object):
         if environment_properties is None:
             self.log.error("Properties not found for Environment: " + environment)
         return environment_properties, environment
+
+
+# Deployed Properties
+PROPS = Properties()

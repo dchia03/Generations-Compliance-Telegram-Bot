@@ -1,7 +1,7 @@
 import unittest
 
-from main.database.block_out_dates import BlockOutDates
-from main.database.member import Member
+from main.entity.database import BlockOutDates
+from main.entity.database import Member
 from main.utils.logger import Logger
 from main.utils.roster_maker import *
 

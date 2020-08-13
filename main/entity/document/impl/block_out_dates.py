@@ -1,44 +1,13 @@
-import datetime as dt
-
-from main.constants.field import *
-from main.entity.document import Document
-
-
-def is_month(month):
-    try:
-        dt.datetime.strptime(month, '%B').month
-        return True
-    except Exception as e:
-        print(e)
-        return False
-
-
-def is_year(year):
-    return type(year) == int
-
-
-def is_block_out_dates(block_out_dates):
-    if type(block_out_dates) == dict:
-        for date in block_out_dates.keys():
-            if not date.isdigit():
-                return False
-        return True
-    else:
-        return False
-
-
-def is_unconfirmed(unconfirmed):
-    if type(unconfirmed) != list:
-        return False
-    else:
-        for name in unconfirmed:
-            if type(name) != str:
-                return False
-        return True
+from main.constants.field_names import *
+from main.entity.document.base.document_base import Document
+from main.entity.document.common.common_document_function_store import *
 
 
 class BlockOutDates(Document):
-    def __init__(self, block_out_dates_details=None, month="January", year=2019, block_out_dates=None, unconfirmed=None):
+    def __init__(
+            self, block_out_dates_details=None, month="January", year=2019,
+            block_out_dates=None, unconfirmed=None
+    ):
         super().__init__(
             all_fields=[
                 FIELD_MONTH, FIELD_YEAR, FIELD_BLOCK_OUT_DATES, FIELD_UNCONFIRMED
@@ -68,13 +37,26 @@ class BlockOutDates(Document):
             self.set_datafield(FIELD_BLOCK_OUT_DATES, block_out_dates)
             self.set_datafield(FIELD_UNCONFIRMED, unconfirmed)
 
+    def get_month(self):
+        return self.get_datafield(FIELD_MONTH)
+
+    def get_year(self):
+        return self.get_datafield(FIELD_YEAR)
+
+    def get_block_out_dates(self):
+        return self.get_datafield(FIELD_BLOCK_OUT_DATES)
+
+    def get_unconfirmed(self):
+        return self.get_datafield(FIELD_UNCONFIRMED)
+
     def get_block_out_dates_str(self):
         msg = "*** No Records ***"
         is_empty_details = True
         for field in self.all_fields:
             is_empty_details &= self.get_datafield(field) is None
         if not is_empty_details:
-            msg = "Block Out Dates for {} {}\n\n".format(self.get_datafield(FIELD_MONTH), self.get_datafield(FIELD_YEAR))
+            msg = "Block Out Dates for {} {}\n\n".format(self.get_datafield(FIELD_MONTH),
+                                                         self.get_datafield(FIELD_YEAR))
             for date in sorted(self.get_datafield(FIELD_BLOCK_OUT_DATES).keys(), key=lambda x: int(x)):
                 msg += "{}: ".format(date)
                 if len(self.get_datafield(FIELD_BLOCK_OUT_DATES)[date]) > 0:
@@ -99,7 +81,8 @@ class BlockOutDates(Document):
 
     def get_member_block_out_dates_str(self, member_name):
         member_block_out_dates_list = self.get_member_block_out_dates_list(member_name)
-        msg = "Block Out Dates for {} in {} {}\n\n".format(member_name, self.get_datafield("Month"), self.get_datafield("Year"))
+        msg = "Block Out Dates for {} in {} {}\n\n".format(member_name, self.get_datafield("Month"),
+                                                           self.get_datafield("Year"))
         msg += "Dates Blocked: "
         if len(member_block_out_dates_list) > 0:
             msg += "{}".format(member_block_out_dates_list[0])

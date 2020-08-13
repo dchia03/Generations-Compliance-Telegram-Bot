@@ -8,18 +8,17 @@ from telegram.ext import (
     CommandHandler, MessageHandler, Filters, ConversationHandler
 )
 
-###############
-## Constants ##
-###############
-from main.constants.field import *
-##############
-## Document ##
-##############
-from main.database.member import Member
 ##############
 ## Database ##
 ##############
-from main.stores.database_store import admin_db
+from main.entity.collection.impl.admin_collection import admin_collection
+###############
+## Constants ##
+###############
+##############
+## Document ##
+##############
+from main.entity.document.impl.member import Member
 ######################
 ## Helper Functions ##
 ######################
@@ -60,9 +59,8 @@ def basic_log(function_name, user_name, msg):
 def admin_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("admin_start", user.first_name, msg)
-    member_details_doc = admin_db.get_document(filter={FIELD_TELEGRAM_ID: str(user.id)})
-    member_details = Member(member_details=member_details_doc)
-    if member_details_doc is None:
+    member_details = admin_collection.get_member(str(user.id))
+    if member_details is None:
         reply_options_list = [[ENTER_MEMBER_DATA], [QUIT]]
     else:
         reply_options_list = [[UPDATE_MEMBER_DATA, DELETE_MEMBER_DATA], [QUIT]]
@@ -100,11 +98,7 @@ def update_member_data_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("update_start", user.first_name, msg)
     if "member_details_str" not in user_data.keys():
-        user_data["member_details"] = Member(
-            member_details=admin_db.get_document(
-                filter={FIELD_TELEGRAM_ID: str(user.id)}
-            )
-        )
+        user_data["member_details"] = admin_collection.get_member(str(user.id))
         user_data["member_details_str"] = user_data["member_details"].get_member_str()
     reply_options_list = refactor_keyboard_layout(Member.EDITABLE_FIELDS) \
                          + [[SUBMIT_MEMBER_DATA], [BACK, QUIT]]
@@ -176,7 +170,7 @@ def update_submit(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("update_submit", user.first_name, msg)
     update.message.reply_text(text="Updating member details in database", reply_markup=ReplyKeyboardRemove())
-    admin_db.update_document(user_data["member_details"])
+    admin_collection.update_document(user_data["member_details"])
     update.message.reply_text(text="Details Updated!\n" + "Going back Admin Menu", reply_markup=ReplyKeyboardRemove())
     return admin_start(bot, update, user_data)
 
@@ -262,7 +256,7 @@ def enter_data_submit_to_database(bot, update, user_data):
     basic_log("enter_data_submit_to_database", user.first_name, msg)
     update.message.reply_text("Uploading Data to Database")
     typing_action(bot, update)
-    admin_db.add_document(user_data["member_details"])
+    admin_collection.add_document(user_data["member_details"])
     update.message.reply_text("Upload Completed\n" + "Returning to Main Menu")
     return admin_start(bot, update, user_data)
 
@@ -294,7 +288,7 @@ def delete_data_from_database(bot, update, user_data):
             "Removing Data",
             reply_markup=ReplyKeyboardRemove()
         )
-        admin_db.delete_document(Member(admin_db.get_document(filter={FIELD_TELEGRAM_ID: str(user.id)})))
+        admin_collection.delete_document(Member(admin_collection.get_member(str(user.id))))
         typing_action(bot, update)
         update.message.reply_text(
             "Data Removed\n" + "Returning to Main Menu",

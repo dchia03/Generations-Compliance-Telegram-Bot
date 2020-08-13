@@ -1,6 +1,6 @@
 import unittest
 
-from main.database.member import Member, is_telegram_id, is_role
+from main.entity.database import Member, is_telegram_id, is_role
 from main.utils.logger import Logger
 
 

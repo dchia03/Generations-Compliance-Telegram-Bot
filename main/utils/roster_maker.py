@@ -1,7 +1,7 @@
 import random
 
-from main.constants.field import *
-from main.database.roster import Roster
+from main.constants.field_names import *
+from main.entity.document.impl.roster import Roster
 
 
 def split_leaders_and_members(all_members):

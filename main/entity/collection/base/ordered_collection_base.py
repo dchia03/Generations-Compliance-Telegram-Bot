@@ -1,5 +1,5 @@
-from main.entity.collection import Collection
-from main.entity.document import Document
+from main.entity.collection.base.collection_base import Collection
+from main.entity.document.base.document_base import Document
 from main.utils.logger import Logger
 
 

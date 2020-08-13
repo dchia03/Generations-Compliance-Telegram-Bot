@@ -1,33 +1,7 @@
-import datetime as dt
-
-from main.constants.field import *
-from main.entity.document import Document
+from main.constants.field_names import *
+from main.entity.document.base.document_base import Document
+from main.entity.document.common.common_document_function_store import *
 from main.utils.logger import Logger
-
-logger = Logger(__name__)
-
-
-def is_month(month):
-    try:
-        dt.datetime.strptime(month, '%B').month
-        return True
-    except Exception as e:
-        logger.error(str(e))
-        return False
-
-
-def is_year(year):
-    return type(year) == int
-
-
-def is_roster(roster):
-    if type(roster) == dict:
-        for date in roster.keys():
-            if not date.isdigit():
-                return False
-        return True
-    else:
-        return False
 
 
 class Roster(Document):
@@ -57,6 +31,15 @@ class Roster(Document):
             self.set_datafield(field=FIELD_MONTH, data=month)
             self.set_datafield(field=FIELD_YEAR, data=year)
             self.set_datafield(field=FIELD_ROSTER, data=roster)
+
+    def get_month(self):
+        return self.get_datafield(FIELD_MONTH)
+
+    def get_year(self):
+        return self.get_datafield(FIELD_YEAR)
+
+    def get_roster(self):
+        return self.get_datafield(FIELD_ROSTER)
 
     def get_roster_str(self):
         msg = "*** No Records ***"
