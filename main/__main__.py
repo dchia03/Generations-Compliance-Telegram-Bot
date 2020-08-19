@@ -10,6 +10,7 @@ from main.props.properties import PROPS
 from main.utils.logger import Logger
 
 log = Logger(__name__)
+__version__ = "1.0.0"
 
 
 ######################
@@ -72,6 +73,8 @@ def cancel(bot, update):
     )
 
 
+log.info("Generations Telegram Chatbot")
+log.info("Version: {version}".format(version = __version__))
 log.info("Application Environment: " + PROPS.environment)
 generations_compliance_bot_token = PROPS.chatbot_token
 updater = Updater(token=generations_compliance_bot_token)
