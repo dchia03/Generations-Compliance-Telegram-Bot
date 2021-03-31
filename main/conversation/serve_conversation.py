@@ -50,7 +50,7 @@ from main.stores.reply_option_store import (
     UNKNOWN_REPLY_MSG
 )
 from main.utils.logger import Logger
-from main.utils.roster_maker import roster_maker
+from main.utils.roster_maker_2 import build_roster
 
 logger = Logger(__name__)
 
@@ -205,11 +205,16 @@ def create_roster(bot, update, user_data):
         ),
         reply_markup=ReplyKeyboardRemove()
     )
-    user_data["new_roster"] = roster_maker(
-        block_out_dates=latest_block_out_dates,
+    user_data["new_roster"] = build_roster(
         all_members=admin_collection.get_all_members(),
-        prev_roster=latest_roster
+        block_out_dates_doc=latest_block_out_dates,
+        prev_roster_doc=latest_roster
     )
+    # user_data["new_roster"] = roster_maker(
+    #     block_out_dates=latest_block_out_dates,
+    #     all_members=admin_collection.get_all_members(),
+    #     prev_roster=latest_roster
+    # )
     return check_roster(bot, update, user_data)
 
 

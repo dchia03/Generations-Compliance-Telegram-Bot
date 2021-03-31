@@ -20,7 +20,15 @@ class Member(Document):
         FIELD_CELL_GROUP: ReplyKeyboardRemove(),
         FIELD_CELL_LEADER: ReplyKeyboardRemove(),
         FIELD_BAPTISED: make_keyboard_reply_markup([[BAPTISED_YES, BAPTISED_NO]]),
-        FIELD_ROLE: make_keyboard_reply_markup([[ROLE_MEMBER]])
+        FIELD_ROLE: make_keyboard_reply_markup([[ROLE_MEMBER]]),
+        FIELD_SERVING_STATUS: make_keyboard_reply_markup([
+            [SERVING_STATUS_ACTIVE,SERVING_STATUS_INACTIVE],
+            [SERVING_STATUS_REMOVED,SERVING_STATUS_NEW_MEMBER]
+        ]),
+        FIELD_COUNTING_ROOM_STATUS: make_keyboard_reply_markup([
+            [COUNTING_ROOM_STATUS_NIL, COUNTING_ROOM_STATUS_SUBMITTED],
+            [COUNTING_ROOM_STATUS_APPROVED, COUNTING_ROOM_STATUS_REJECTED]
+        ])
     }
     ALL_FIELDS_ENTRY_EGS = {
         FIELD_TELEGRAM_ID: None,
@@ -31,7 +39,9 @@ class Member(Document):
         FIELD_CELL_GROUP: "GY 1.1",
         FIELD_CELL_LEADER: "Matt Chen",
         FIELD_BAPTISED: "Yes or No",
-        FIELD_ROLE: "Member"
+        FIELD_ROLE: ROLE_MEMBER,
+        FIELD_SERVING_STATUS: SERVING_STATUS_ACTIVE,
+        FIELD_COUNTING_ROOM_STATUS: COUNTING_ROOM_STATUS_NIL
     }
     EDITABLE_FIELDS = [
         FIELD_FULL_NAME, FIELD_NAME, FIELD_DOB, FIELD_HP,
@@ -42,7 +52,8 @@ class Member(Document):
         super().__init__(
             all_fields=[
                 FIELD_TELEGRAM_ID, FIELD_FULL_NAME, FIELD_NAME, FIELD_DOB, FIELD_HP,
-                FIELD_CELL_GROUP, FIELD_CELL_LEADER, FIELD_BAPTISED, FIELD_ROLE
+                FIELD_CELL_GROUP, FIELD_CELL_LEADER, FIELD_BAPTISED, FIELD_ROLE,
+                FIELD_SERVING_STATUS, FIELD_COUNTING_ROOM_STATUS
             ],
             all_fields_data_type={
                 FIELD_TELEGRAM_ID: str,
@@ -53,7 +64,9 @@ class Member(Document):
                 FIELD_CELL_GROUP: str,
                 FIELD_CELL_LEADER: str,
                 FIELD_BAPTISED: str,
-                FIELD_ROLE: str
+                FIELD_ROLE: str,
+                FIELD_SERVING_STATUS: str,
+                FIELD_COUNTING_ROOM_STATUS: str
             },
             all_fields_data_format={
                 FIELD_TELEGRAM_ID: is_telegram_id,
@@ -64,9 +77,11 @@ class Member(Document):
                 FIELD_CELL_GROUP: is_cell_group,
                 FIELD_CELL_LEADER: is_cell_leader,
                 FIELD_BAPTISED: is_baptised,
-                FIELD_ROLE: is_role
+                FIELD_ROLE: is_role,
+                FIELD_SERVING_STATUS: is_serving_status(),
+                FIELD_COUNTING_ROOM_STATUS: is_counting_room_approved()
             },
-            non_editable_fields=[FIELD_TELEGRAM_ID, FIELD_ROLE],
+            non_editable_fields=[FIELD_TELEGRAM_ID, FIELD_ROLE, FIELD_SERVING_STATUS, FIELD_COUNTING_ROOM_STATUS],
             document_details=member_details
         )
         if member_details is None:
@@ -127,3 +142,21 @@ class Member(Document):
 
     def get_role(self):
         return self.get_datafield(FIELD_ROLE)
+
+    def is_leader(self):
+        return self.get_role() == ROLE_LEADER
+
+    def get_serving_status(self):
+        return self.get_datafield(FIELD_SERVING_STATUS)
+
+    def get_counting_room_status(self):
+        return self.get_datafield(FIELD_COUNTING_ROOM_STATUS)
+
+    def is_counting_room_approved(self):
+        return self.get_counting_room_status() == COUNTING_ROOM_STATUS_APPROVED
+
+    def is_ministry_head(self):
+        return self.get_role() == ROLE_MINISTRY_HEAD
+
+    def get_master_editable_fields(self):
+        return [field for field in self.all_fields if field != FIELD_TELEGRAM_ID]

@@ -316,9 +316,9 @@ def cancel(bot, update):
     return ConversationHandler.END
 
 
-################################################
-### Administration List Conversation Handler ###
-################################################
+#######################################
+### Admin List Conversation Handler ###
+#######################################
 admin_conv_handler = ConversationHandler(
     entry_points=[
         CommandHandler(ADMIN.get_name(), admin_start, pass_user_data=True)

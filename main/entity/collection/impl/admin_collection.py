@@ -1,5 +1,5 @@
 from main.constants.database_names import ADMINISTRATION_COLLECTION
-from main.constants.field_names import FIELD_ROLE, ROLE_MEMBER, ROLE_MINISTRY_HEAD, FIELD_TELEGRAM_ID
+from main.constants.field_names import FIELD_ROLE, ROLE_MEMBER, ROLE_MINISTRY_HEAD, FIELD_TELEGRAM_ID, FIELD_NAME
 from main.entity.collection.base.collection_base import Collection
 from main.entity.database.impl.main_database import db
 from main.entity.document.impl.member import Member
@@ -47,19 +47,27 @@ class AdminCollection(Collection):
         )
 
     def get_member(self, telegram_id):
-        return Member(
-            member_details=self.get_document(
-                filter={
-                    FIELD_TELEGRAM_ID: str(telegram_id)
-                }
-            )
-        )
+        member_details = self.get_document(filter={FIELD_TELEGRAM_ID: str(telegram_id)})
+        if member_details is None:
+            return None
+        else:
+            return Member(member_details=member_details)
+
+    def get_member_from_name(self, name):
+        member_details = self.get_document(filter={FIELD_NAME: str(name)})
+        if member_details is None:
+            return None
+        else:
+            return Member(member_details=member_details)
 
     def get_all_members(self):
         return [Member(member_details=member_details) for member_details in self.get_collection_list()]
 
     def get_all_leaders(self):
-        return [m for m in self.get_all_members() if m.get_role() == ROLE_MEMBER or ROLE_MINISTRY_HEAD]
+        return [m for m in self.get_all_members() if m.is_leader() or m.is_ministry_head()]
+
+    def get_all_members_name(self):
+        return [m.get_name() for m in self.get_all_members()]
 
 
 admin_collection = AdminCollection(

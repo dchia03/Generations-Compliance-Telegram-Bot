@@ -100,3 +100,20 @@ FEEDBACK_CHECK = ReplyOption("Feedback Check")
 FEEDBACK_CHECK_REPLY = ReplyOption("Feedback Check Reply")
 
 SEND = ReplyOption("Send", "Send Query to Administrator")
+
+######################
+# MasterConversation #
+######################
+MASTER = ReplyOption("Master")
+MASTER_REPLY = ReplyOption("Master Reply")
+
+MASTER_EDIT = ReplyOption("Master Edit", "Edit Details")
+MASTER_DELETE = ReplyOption("Master Delete", "Delete Details")
+MASTER_SUBMIT = ReplyOption("Master Submit", "Submit Details")
+
+MASTER_MEMBER_DETAILS = ReplyOption("Master Member Details", "Edit Member Details")
+MASTER_MEMBER_DETAILS_REPLY = ReplyOption("Master Member Details Reply")
+MASTER_VIEW_MEMBER_DETAILS_REPLY = ReplyOption("Master View Member Details Reply")
+MASTER_EDIT_MEMBER_DETAILS_REPLY = ReplyOption("Master Edit Member Details Reply")
+
+MASTER_ROSTER = ReplyOption("Master Roster", "Edit Roster Details")

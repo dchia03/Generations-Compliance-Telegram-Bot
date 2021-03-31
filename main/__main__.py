@@ -2,7 +2,7 @@ from telegram import ReplyKeyboardRemove
 from telegram.ext import CommandHandler
 from telegram.ext import Updater
 
-from main.conversation.administration_conversation import admin_conv_handler
+from main.conversation.admin_conversation import admin_conv_handler
 from main.conversation.feedback_conversation import feedback_conv_handler
 from main.conversation.serve_conversation import serve_conv_handler
 from main.entity.collection.impl.admin_collection import admin_collection

@@ -80,12 +80,7 @@ def make_options_text_and_reply_markup(reply_options_list):
                 label = reply_option
             kb_row.append(KeyboardButton(label, callback_data=label))
         kb.append(kb_row)
-    reply_markup = ReplyKeyboardMarkup(
-        kb,
-        one_time_keyboard=True,
-        resize_keyboard=True,
-        selective=True
-    )
+    reply_markup = ReplyKeyboardMarkup(kb, one_time_keyboard=True, resize_keyboard=True, selective=True)
     options_text = make_options_text(
         [option.get_description() for row in reply_options_list for option in row if
          isinstance(option, ReplyOption) and option.get_description() is not None]
