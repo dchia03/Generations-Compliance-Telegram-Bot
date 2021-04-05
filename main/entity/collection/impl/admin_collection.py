@@ -47,13 +47,7 @@ class AdminCollection(Collection):
         )
 
     def get_member(self, telegram_id):
-        return Member(
-            member_details=self.get_document(
-                filter={
-                    FIELD_TELEGRAM_ID: str(telegram_id)
-                }
-            )
-        )
+        return Member(member_details=self.get_document(filter={FIELD_TELEGRAM_ID: str(telegram_id)}))
 
     def get_all_members(self):
         return [Member(member_details=member_details) for member_details in self.get_collection_list()]
