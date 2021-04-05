@@ -10,7 +10,7 @@ from main.props.properties import PROPS
 from main.utils.logger import Logger
 
 log = Logger(__name__)
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 ######################

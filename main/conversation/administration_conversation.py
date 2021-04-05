@@ -60,7 +60,7 @@ def admin_start(bot, update, user_data):
     user, msg = init(bot, update)
     basic_log("admin_start", user.first_name, msg)
     member_details = admin_collection.get_member(str(user.id))
-    if member_details is None:
+    if member_details.is_empty():
         reply_options_list = [[ENTER_MEMBER_DATA], [QUIT]]
     else:
         reply_options_list = [[UPDATE_MEMBER_DATA, DELETE_MEMBER_DATA], [QUIT]]
@@ -288,7 +288,7 @@ def delete_data_from_database(bot, update, user_data):
             "Removing Data",
             reply_markup=ReplyKeyboardRemove()
         )
-        admin_collection.delete_document(Member(admin_collection.get_member(str(user.id))))
+        admin_collection.delete_document(admin_collection.get_member(str(user.id)))
         typing_action(bot, update)
         update.message.reply_text(
             "Data Removed\n" + "Returning to Main Menu",
