@@ -288,7 +288,7 @@ def delete_data_from_database(bot, update, user_data):
             "Removing Data",
             reply_markup=ReplyKeyboardRemove()
         )
-        admin_collection.delete_document(Member(admin_collection.get_member(str(user.id))))
+        admin_collection.delete_document(admin_collection.get_member(str(user.id)))
         typing_action(bot, update)
         update.message.reply_text(
             "Data Removed\n" + "Returning to Main Menu",
